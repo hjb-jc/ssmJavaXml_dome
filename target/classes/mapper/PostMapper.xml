@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nf147.sim.dao.PostMapper">
+
+  <resultMap id="BaseResultMap" type="com.nf147.sim.entity.Post">
+    <id column="p_id" jdbcType="INTEGER" property="p_id" />
+    <result column="a_id" jdbcType="INTEGER" property="a_id" />
+    <result column="p_title" jdbcType="VARCHAR" property="p_title" />
+    <result column="p_content" jdbcType="VARCHAR" property="p_content" />
+    <result column="p_date" jdbcType="TIMESTAMP" property="p_date" />
+
+    <association property="author" javaType="com.nf147.sim.entity.Author"  >
+        <id column="a_id" jdbcType="INTEGER" property="a_id" />
+        <result column="a_name" jdbcType="VARCHAR" property="a_name" />
+        <result column="a_address" jdbcType="VARCHAR" property="a_address" />
+    </association>
+
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from post
+    where p_id = #{p_id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.nf147.sim.entity.Post">
+    insert into post (p_id, a_id, p_title, 
+      p_content, p_date)
+    values (#{p_id,jdbcType=INTEGER}, #{a_id,jdbcType=INTEGER}, #{p_title,jdbcType=VARCHAR}, 
+      #{p_content,jdbcType=VARCHAR}, #{p_date,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.nf147.sim.entity.Post">
+    update post
+    set a_id = #{a_id,jdbcType=INTEGER},
+      p_title = #{p_title,jdbcType=VARCHAR},
+      p_content = #{p_content,jdbcType=VARCHAR},
+      p_date = #{p_date,jdbcType=TIMESTAMP}
+    where p_id = #{p_id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select p_id, a_id, p_title, p_content, p_date
+    from post
+    where p_id = #{p_id,jdbcType=INTEGER}
+  </select>
+
+  <!--<select id="selectAll" resultMap="BaseResultMap">-->
+    <!--select p_id, p.a_id, p_title, p_content, p_date,a.a_name from post p-->
+    <!--join author a on p.a_id = a.a_id-->
+  <!--</select>-->
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select p.*,a.* from post p
+    join author a on p.a_id = a.a_id
+  </select>
+
+</mapper>
