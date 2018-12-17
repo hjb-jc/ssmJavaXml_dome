@@ -8,6 +8,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Configuration
 @ComponentScan(basePackages = {"config_dome"}
                 ,excludeFilters = { @ComponentScan.Filter(type = FilterType.ANNOTATION ,value = EnableWebMvc.class)})
-public class ContextConfig {
+public class WebConfig {
 
 }

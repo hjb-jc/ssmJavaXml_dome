@@ -5,6 +5,7 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -12,17 +13,17 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import java.beans.PropertyVetoException;
+import java.io.IOException;
 
 @Configuration
 @PropertySource("classpath:application.properties")
-public class DaoConfig {
+public class DaoConfig implements EnvironmentAware {
 
-    @Autowired
     Environment evn;
-
 
     //想使用占位符
     public static PropertySourcesPlaceholderConfigurer s(){
@@ -43,20 +44,26 @@ public class DaoConfig {
         dataSource.setUser(evn.getProperty("jdbc.user"));
         dataSource.setPassword("${jdbc.password}");*/
 
-        dataSource.setJdbcUrl("jdbc:mariadb://localhost:3306/contactdb");
-        dataSource.setDriverClass("org.mariadb.jdbc.Driver");
-        dataSource.setUser("root");
-        dataSource.setPassword("123456");
+        dataSource.setJdbcUrl(evn.getProperty("jdbc.url"));
+        dataSource.setDriverClass(evn.getProperty("jdbc.driver"));
+        dataSource.setUser(evn.getProperty("jdbc.user"));
+        dataSource.setPassword(evn.getProperty("jdbc.password"));
         return dataSource;
     }
 
     //配置Mybatis
     @Bean
-    public SqlSessionFactoryBean mybatisConf() throws PropertyVetoException {
+    public SqlSessionFactoryBean mybatisConf() throws PropertyVetoException, IOException {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setConfigLocation(new ClassPathResource("mybatis-config.xml"));
         sqlSessionFactoryBean.setDataSource(dataSource());
-        sqlSessionFactoryBean.setMapperLocations(new Resource[]{new ClassPathResource("mapper/AuthorMapper.xml")});
+
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        //多个的
+        sqlSessionFactoryBean.setMapperLocations(resolver.getResources("classpath:mapper/*.xml"));
+        //单一的
+        //sqlSessionFactoryBean.setMapperLocations(new Resource[]{new ClassPathResource("mapper/AuthorMapper.xml")});
+
         sqlSessionFactoryBean.setTypeAliasesPackage("com.nf147.sim.entity");
         return sqlSessionFactoryBean;
     }
@@ -79,5 +86,8 @@ public class DaoConfig {
     }
 
 
-
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.evn= environment;
+    }
 }
